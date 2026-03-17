@@ -23,6 +23,62 @@
     --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
 
+
+  /* ─────────────────────────────────────
+     API KEY BANNER
+  ───────────────────────────────────── */
+  .api-key-banner {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 10px 16px;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    border-bottom: 1px solid rgba(212,160,23,0.3);
+  }
+
+  .api-key-banner.hidden { display: none; }
+
+  .api-key-label {
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--gold); white-space: nowrap; flex-shrink: 0;
+  }
+
+  .api-key-input {
+    flex: 1; min-width: 180px;
+    font-family: 'DM Mono', monospace; font-size: 12px;
+    color: var(--cream); background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(212,160,23,0.3); outline: none;
+    padding: 6px 10px; letter-spacing: 0.04em;
+  }
+
+  .api-key-input::placeholder { color: rgba(255,255,255,0.3); }
+  .api-key-input:focus { border-color: var(--gold); }
+
+  .api-key-save {
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 7px 16px; background: var(--gold); color: var(--ink);
+    border: none; cursor: pointer; flex-shrink: 0; min-height: 36px;
+  }
+
+  .api-key-save:active { opacity: 0.8; }
+
+  .api-key-set-indicator {
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--gold); opacity: 0.7; display: none;
+  }
+
+  .api-key-set-indicator.visible { display: block; }
+
+  .api-key-help {
+    font-family: 'DM Mono', monospace; font-size: 9px;
+    color: rgba(255,255,255,0.35); letter-spacing: 0.05em;
+    width: 100%;
+  }
+
+  .api-key-help a { color: var(--gold); opacity: 0.7; }
+
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
   html { scroll-behavior: smooth; }
@@ -606,6 +662,17 @@
 </style>
 </head>
 <body>
+
+<!-- API KEY BANNER (only shown when no proxy available) -->
+<div class="api-key-banner hidden" id="api-key-banner">
+  <span class="api-key-label">🔑 API Key</span>
+  <input class="api-key-input" id="api-key-input" type="password"
+    placeholder="sk-ant-…  (your Anthropic API key)"
+    autocomplete="off" spellcheck="false" />
+  <button class="api-key-save" onclick="saveApiKey()">Save</button>
+  <span class="api-key-set-indicator" id="api-key-set-indicator">✓ Key saved</span>
+  <span class="api-key-help">Key stays in memory only — never stored or sent anywhere except Anthropic. Get one at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></span>
+</div>
 
 <!-- MASTHEAD -->
 <header class="masthead">
@@ -1222,13 +1289,17 @@ Return ONLY a raw JSON array. No markdown, no fences. ${isSingleDay ? '12-18' : 
 Balance all 3 towns. Multiple events per day is great.`;
 
   try {
+    const apiKey = window._anthropicKey || '';
+    const headers = {
+      'Content-Type': 'application/json',
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    };
+    if (apiKey) headers['x-api-key'] = apiKey;
+
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
+      headers,
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514', max_tokens: 5000,
         tools: [{ type: 'web_search_20250305', name: 'web_search' }],
@@ -1290,6 +1361,37 @@ Balance all 3 towns. Multiple events per day is great.`;
     document.getElementById('fetch-btn').disabled = false;
   }
 }
+
+// ════════════════════════════════════════
+//  API KEY MANAGEMENT
+// ════════════════════════════════════════
+window._anthropicKey = '';
+
+function saveApiKey() {
+  const val = document.getElementById('api-key-input').value.trim();
+  if (!val.startsWith('sk-ant-')) {
+    alert('That doesn\'t look like a valid Anthropic API key (should start with sk-ant-)');
+    return;
+  }
+  window._anthropicKey = val;
+  document.getElementById('api-key-input').value = '';
+  document.getElementById('api-key-set-indicator').classList.add('visible');
+  setTimeout(() => document.getElementById('api-key-set-indicator').classList.remove('visible'), 3000);
+}
+
+// Allow Enter key in key input
+document.getElementById('api-key-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') saveApiKey();
+});
+
+// Detect if we're running outside claude.ai (no proxy) and show the key banner
+(function detectEnv() {
+  const host = window.location.hostname;
+  const needsKey = host !== '' && !host.includes('claude.ai') && !host.includes('anthropic.com');
+  if (needsKey) {
+    document.getElementById('api-key-banner').classList.remove('hidden');
+  }
+})();
 
 // ════════════════════════════════════════
 //  INIT
