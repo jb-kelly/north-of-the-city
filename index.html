@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>North of the City</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1208;
+    --cream: #f5f0e8;
+    --warm-white: #faf8f3;
+    --rust: #c4440a;
+    --gold: #d4a017;
+    --sage: #4a6741;
+    --sky: #2e5f8a;
+    --light-rule: #d9d0bc;
+    --mid-rule: #b8ac94;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--warm-white);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* MASTHEAD */
+  .masthead {
+    background: var(--ink);
+    color: var(--cream);
+    border-bottom: 3px double var(--gold);
+  }
+
+  .masthead-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 32px 8px;
+    border-bottom: 1px solid rgba(212,160,23,0.3);
+  }
+
+  .issue-info {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    opacity: 0.8;
+  }
+
+  .masthead-title {
+    text-align: center;
+    padding: 16px 32px 12px;
+  }
+
+  .masthead-title h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(42px, 8vw, 88px);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    line-height: 0.9;
+    color: var(--cream);
+  }
+
+  .masthead-title h1 em { font-style: italic; color: var(--gold); }
+
+  .masthead-tagline {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--mid-rule);
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .masthead-tagline span { opacity: 0.5; }
+
+  /* FILTERS BAR */
+  .filters-bar {
+    background: var(--cream);
+    border-bottom: 2px solid var(--ink);
+    padding: 0 32px;
+    display: flex;
+    align-items: stretch;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .filter-group {
+    display: flex;
+    align-items: center;
+    border-right: 1px solid var(--light-rule);
+    padding: 10px 20px 10px 0;
+    margin-right: 20px;
+  }
+
+  .filter-group:last-of-type { border-right: none; margin-left: auto; padding-right: 0; }
+
+  .filter-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--rust);
+    margin-right: 10px;
+    white-space: nowrap;
+  }
+
+  .filter-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    padding: 4px 10px;
+    border: 1px solid var(--mid-rule);
+    background: transparent;
+    cursor: pointer;
+    color: var(--ink);
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+
+  .pill:hover { border-color: var(--ink); background: rgba(26,18,8,0.05); }
+  .pill.active { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+  .pill.town-med.active { background: var(--rust); border-color: var(--rust); }
+  .pill.town-som.active { background: var(--sage); border-color: var(--sage); }
+  .pill.town-cam.active { background: var(--sky); border-color: var(--sky); }
+
+  .fetch-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 8px 18px;
+    background: var(--rust);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    align-self: center;
+  }
+
+  .fetch-btn:hover { background: #a33508; }
+  .fetch-btn:disabled { background: var(--mid-rule); cursor: wait; }
+
+  /* SEARCH BAR */
+  .search-bar {
+    background: var(--warm-white);
+    border-bottom: 1px solid var(--light-rule);
+    padding: 10px 32px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: sticky;
+    top: 47px; /* sits just below the filters-bar */
+    z-index: 99;
+  }
+
+  .search-bar.hidden { display: none; }
+
+  .search-icon {
+    font-size: 13px;
+    color: var(--mid-rule);
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .search-input {
+    flex: 1;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 2px 0;
+  }
+
+  .search-input::placeholder {
+    color: var(--mid-rule);
+    font-style: italic;
+  }
+
+  .search-clear {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--mid-rule);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 6px;
+    transition: color 0.15s;
+    display: none;
+  }
+
+  .search-clear.visible { display: block; }
+  .search-clear:hover { color: var(--rust); }
+
+  .search-match mark {
+    background: rgba(212, 160, 23, 0.28);
+    color: inherit;
+    border-radius: 1px;
+    padding: 0 1px;
+  }
+
+  /* MAIN */
+  .main { max-width: 1200px; margin: 0 auto; padding: 32px; }
+
+  /* ── CALENDAR PANEL ── */
+  .calendar-panel {
+    border: 1px solid var(--light-rule);
+    background: var(--cream);
+    margin-bottom: 28px;
+    display: none;
+  }
+
+  .calendar-panel.visible { display: block; }
+
+  .calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--light-rule);
+    background: var(--ink);
+  }
+
+  .cal-nav {
+    font-family: 'DM Mono', monospace;
+    font-size: 16px;
+    background: none;
+    border: none;
+    color: var(--cream);
+    cursor: pointer;
+    padding: 2px 8px;
+    opacity: 0.7;
+    transition: opacity 0.15s;
+    line-height: 1;
+  }
+
+  .cal-nav:hover { opacity: 1; }
+
+  .cal-month-label {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--cream);
+  }
+
+  .cal-all-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border: 1px solid rgba(212,160,23,0.5);
+    background: transparent;
+    color: var(--gold);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .cal-all-btn:hover,
+  .cal-all-btn.active { background: var(--gold); color: var(--ink); border-color: var(--gold); }
+
+  .calendar-body { padding: 14px 20px 16px; }
+
+  .cal-dow-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+    margin-bottom: 4px;
+  }
+
+  .cal-dow {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--mid-rule);
+    padding: 2px 0;
+  }
+
+  .cal-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+  }
+
+  .cal-day {
+    position: relative;
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    transition: all 0.12s;
+  }
+
+  .cal-day.empty { cursor: default; pointer-events: none; }
+
+  .cal-day:not(.empty):hover { border-color: var(--mid-rule); background: var(--warm-white); }
+
+  .cal-day.selected { background: var(--ink) !important; border-color: var(--ink) !important; }
+  .cal-day.selected .cal-day-num { color: var(--cream); }
+
+  .cal-day.today .cal-day-num { color: var(--rust); font-weight: 700; }
+
+  .cal-day-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    line-height: 1;
+    color: var(--ink);
+  }
+
+  .cal-day.faded .cal-day-num { color: var(--light-rule); }
+
+  .cal-dots {
+    display: flex;
+    gap: 2px;
+    margin-top: 3px;
+    justify-content: center;
+    flex-wrap: wrap;
+    max-width: 22px;
+  }
+
+  .cal-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot-medford   { background: var(--rust); }
+  .dot-somerville{ background: var(--sage); }
+  .dot-cambridge { background: var(--sky); }
+
+  .cal-day-label {
+    font-family: 'Playfair Display', serif;
+    font-size: 14px;
+    font-style: italic;
+    color: var(--ink);
+    padding: 8px 20px 10px;
+    border-top: 1px solid var(--light-rule);
+    display: none;
+  }
+
+  .cal-day-label.visible { display: block; }
+
+  /* Legend */
+  .cal-legend {
+    display: flex;
+    gap: 16px;
+    padding: 0 20px 12px;
+  }
+
+  .cal-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--mid-rule);
+  }
+
+  .cal-legend-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  /* STATUS BAR */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--light-rule);
+    padding-bottom: 12px;
+    margin-bottom: 28px;
+  }
+
+  .status-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--mid-rule);
+    letter-spacing: 0.08em;
+  }
+
+  .status-count {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    color: var(--ink);
+  }
+
+  /* LOADING */
+  .loading-state { text-align: center; padding: 80px 40px; display: none; }
+  .loading-state.visible { display: block; }
+
+  .loading-spinner {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 2px solid var(--light-rule);
+    border-top-color: var(--rust);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 16px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--mid-rule);
+  }
+
+  .loading-subtext { font-size: 12px; color: var(--mid-rule); margin-top: 8px; }
+
+  /* EMPTY */
+  .empty-state { text-align: center; padding: 80px 40px; display: none; }
+  .empty-state.visible { display: block; }
+
+  .empty-headline {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-style: italic;
+    color: var(--mid-rule);
+    margin-bottom: 12px;
+  }
+
+  .empty-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--mid-rule);
+    text-transform: uppercase;
+  }
+
+  /* EVENTS GRID */
+  .events-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 0;
+    border-top: 1px solid var(--light-rule);
+    border-left: 1px solid var(--light-rule);
+  }
+
+  .events-grid.hidden { display: none; }
+
+  /* EVENT CARD */
+  .event-card {
+    border-right: 1px solid var(--light-rule);
+    border-bottom: 1px solid var(--light-rule);
+    padding: 22px 24px;
+    background: var(--warm-white);
+    transition: background 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .event-card:hover { background: var(--cream); }
+
+  .event-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+  }
+
+  .event-card.town-medford::before   { background: var(--rust); }
+  .event-card.town-somerville::before{ background: var(--sage); }
+  .event-card.town-cambridge::before { background: var(--sky); }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .card-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--rust);
+  }
+
+  .card-town {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border: 1px solid currentColor;
+  }
+
+  .card-town.town-medford   { color: var(--rust); }
+  .card-town.town-somerville{ color: var(--sage); }
+  .card-town.town-cambridge { color: var(--sky); }
+
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+
+  .card-type {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--ink);
+    color: var(--cream);
+    padding: 2px 7px;
+    margin-bottom: 10px;
+  }
+
+  .card-desc { font-size: 13px; line-height: 1.6; color: #4a3f2e; margin-bottom: 12px; }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--light-rule);
+    padding-top: 10px;
+  }
+
+  .card-location {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--mid-rule);
+    letter-spacing: 0.05em;
+  }
+
+  .card-link {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--rust);
+    text-decoration: none;
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 1px;
+    transition: opacity 0.15s;
+  }
+
+  .card-link:hover { opacity: 0.6; }
+
+  /* ERROR */
+  .error-banner {
+    background: #fff3f0;
+    border: 1px solid var(--rust);
+    padding: 12px 20px;
+    margin-bottom: 24px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--rust);
+    letter-spacing: 0.05em;
+    display: none;
+  }
+
+  .error-banner.visible { display: block; }
+
+  /* WELCOME */
+  .welcome-panel {
+    border: 1px solid var(--light-rule);
+    padding: 48px;
+    text-align: center;
+    background: var(--cream);
+  }
+
+  .welcome-panel.hidden { display: none; }
+
+  .welcome-ornament { font-size: 32px; margin-bottom: 16px; opacity: 0.4; }
+
+  .welcome-headline {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-style: italic;
+    margin-bottom: 12px;
+  }
+
+  .welcome-body {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #5a4e3a;
+    max-width: 480px;
+    margin: 0 auto 28px;
+  }
+
+  .welcome-sources {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mid-rule);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .welcome-sources span { padding: 3px 10px; border: 1px solid var(--light-rule); }
+
+  .welcome-cta {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 12px 32px;
+    background: var(--rust);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .welcome-cta:hover { background: #a33508; }
+
+  @media (max-width: 600px) {
+    .filters-bar, .masthead-top { padding-left: 16px; padding-right: 16px; }
+    .main { padding: 16px; }
+    .masthead-title { padding: 12px 16px 10px; }
+    .events-grid { grid-template-columns: 1fr; }
+    .welcome-panel { padding: 32px 20px; }
+    .cal-day-num { font-size: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-top">
+    <div class="issue-info">Medford · Somerville · Cambridge</div>
+    <div class="issue-info" id="today-date"></div>
+  </div>
+  <div class="masthead-title">
+    <h1>North <em>of the</em> City</h1>
+    <div class="masthead-tagline"><span>◆</span> Local Events, All in One Place <span>◆</span></div>
+  </div>
+</header>
+
+<nav class="filters-bar">
+  <div class="filter-group">
+    <span class="filter-label">Town</span>
+    <div class="filter-pills">
+      <button class="pill active" data-filter="town" data-value="all">All</button>
+      <button class="pill town-med" data-filter="town" data-value="medford">Medford</button>
+      <button class="pill town-som" data-filter="town" data-value="somerville">Somerville</button>
+      <button class="pill town-cam" data-filter="town" data-value="cambridge">Cambridge</button>
+    </div>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Type</span>
+    <div class="filter-pills">
+      <button class="pill active" data-filter="type" data-value="all">All</button>
+      <button class="pill" data-filter="type" data-value="arts">Arts</button>
+      <button class="pill" data-filter="type" data-value="music">Music</button>
+      <button class="pill" data-filter="type" data-value="food">Food & Drink</button>
+      <button class="pill" data-filter="type" data-value="community">Community</button>
+      <button class="pill" data-filter="type" data-value="outdoors">Outdoors</button>
+      <button class="pill" data-filter="type" data-value="kids">Kids</button>
+      <button class="pill" data-filter="type" data-value="sports">Sports</button>
+    </div>
+  </div>
+  <div class="filter-group">
+    <button class="fetch-btn" id="fetch-btn" onclick="fetchEvents()">↻ Refresh Events</button>
+  </div>
+</nav>
+
+<!-- SEARCH BAR -->
+<div class="search-bar hidden" id="search-bar">
+  <span class="search-icon">⌕</span>
+  <input class="search-input" id="search-input" type="text"
+    placeholder="Search by keyword, venue, or event name…"
+    oninput="onSearchInput(this.value)" />
+  <button class="search-clear" id="search-clear" onclick="clearSearch()">✕ Clear</button>
+</div>
+
+<main class="main">
+
+  <!-- CALENDAR -->
+  <div class="calendar-panel" id="calendar-panel">
+    <div class="calendar-header">
+      <button class="cal-nav" onclick="shiftMonth(-1)">‹</button>
+      <span class="cal-month-label" id="cal-month-label"></span>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="cal-all-btn active" id="cal-all-btn" onclick="clearDayFilter()">All Days</button>
+        <button class="cal-nav" onclick="shiftMonth(1)">›</button>
+      </div>
+    </div>
+    <div class="calendar-body">
+      <div class="cal-dow-row">
+        <div class="cal-dow">Sun</div><div class="cal-dow">Mon</div><div class="cal-dow">Tue</div>
+        <div class="cal-dow">Wed</div><div class="cal-dow">Thu</div><div class="cal-dow">Fri</div>
+        <div class="cal-dow">Sat</div>
+      </div>
+      <div class="cal-days" id="cal-days"></div>
+    </div>
+    <div class="cal-legend">
+      <div class="cal-legend-item"><div class="cal-legend-dot dot-medford"></div>Medford</div>
+      <div class="cal-legend-item"><div class="cal-legend-dot dot-somerville"></div>Somerville</div>
+      <div class="cal-legend-item"><div class="cal-legend-dot dot-cambridge"></div>Cambridge</div>
+    </div>
+    <div class="cal-day-label" id="cal-day-label"></div>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-text" id="status-text">Ready to load events</div>
+    <div class="status-count" id="status-count"></div>
+  </div>
+
+  <div class="error-banner" id="error-banner"></div>
+
+  <div class="welcome-panel" id="welcome-panel">
+    <div class="welcome-ornament">✦</div>
+    <div class="welcome-headline">What's happening north of the city?</div>
+    <div class="welcome-body">A curated feed of local events across Medford, Somerville, and Cambridge — pulled fresh from city calendars, community boards, and local event sites.</div>
+    <div class="welcome-sources">
+      <span>City of Cambridge</span><span>City of Somerville</span><span>City of Medford</span>
+      <span>Eventbrite</span><span>Do617</span><span>Patch</span>
+    </div>
+    <button class="welcome-cta" onclick="fetchEvents()">Load Today's Events</button>
+  </div>
+
+  <div class="loading-state" id="loading-state">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Scanning local calendars</div>
+    <div class="loading-subtext" id="loading-subtext">Searching Medford, Somerville, and Cambridge...</div>
+  </div>
+
+  <div class="empty-state" id="empty-state">
+    <div class="empty-headline">Nothing found</div>
+    <div class="empty-sub">Try adjusting your filters or pick a different day</div>
+  </div>
+
+  <div class="events-grid hidden" id="events-grid"></div>
+</main>
+
+<script>
+  const NOW = new Date();
+  let allEvents  = [];
+  let filters    = { town: 'all', type: 'all' };
+  let selectedDay = null; // "YYYY-MM-DD"
+  let searchQuery = '';
+  let calYear    = NOW.getFullYear();
+  let calMonth   = NOW.getMonth();
+
+  document.getElementById('today-date').textContent = NOW.toLocaleDateString('en-US',
+    { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+
+  // ── Pill filters
+  document.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      const g = pill.dataset.filter;
+      document.querySelectorAll(`.pill[data-filter="${g}"]`).forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      filters[g] = pill.dataset.value;
+      renderEvents();
+    });
+  });
+
+  // ── Helpers
+  function toISO(d) { return d.toISOString().slice(0,10); }
+  const todayISO = toISO(NOW);
+
+  function townClass(town) {
+    if (!town) return '';
+    const t = town.toLowerCase();
+    return t.includes('medford') ? 'town-medford'
+         : t.includes('somerville') ? 'town-somerville'
+         : t.includes('cambridge') ? 'town-cambridge' : '';
+  }
+
+  // Parse AI date strings like "Sat, Mar 22" or "Thu, Mar 20 · 7pm"
+  function parseEventDate(s) {
+    if (!s) return null;
+    const clean = s.replace(/·.*$/, '').replace(/,/g,'').trim();
+    // Try this year and next
+    for (const yr of [calYear, calYear+1]) {
+      const d = new Date(`${clean} ${yr}`);
+      if (!isNaN(d)) return d;
+    }
+    return null;
+  }
+
+  // Build map ISO -> Set of towns
+  function buildEventMap() {
+    const map = {};
+    allEvents.forEach(e => {
+      const d = parseEventDate(e.date);
+      if (!d) return;
+      const k = toISO(d);
+      if (!map[k]) map[k] = new Set();
+      map[k].add((e.town||'').toLowerCase());
+    });
+    return map;
+  }
+
+  // ── Calendar
+  function renderCalendar() {
+    const eventMap = buildEventMap();
+    document.getElementById('cal-month-label').textContent =
+      new Date(calYear, calMonth, 1).toLocaleDateString('en-US', { month:'long', year:'numeric' });
+
+    const firstDow = new Date(calYear, calMonth, 1).getDay();
+    const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+    const daysInPrev  = new Date(calYear, calMonth, 0).getDate();
+
+    const grid = document.getElementById('cal-days');
+    grid.innerHTML = '';
+
+    // Leading cells from previous month
+    for (let i = 0; i < firstDow; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cal-day faded';
+      const n = document.createElement('div');
+      n.className = 'cal-day-num';
+      n.textContent = daysInPrev - firstDow + 1 + i;
+      cell.appendChild(n);
+      cell.style.pointerEvents = 'none';
+      grid.appendChild(cell);
+    }
+
+    // Current month days
+    for (let day = 1; day <= daysInMonth; day++) {
+      const d = new Date(calYear, calMonth, day);
+      const iso = toISO(d);
+      const cell = document.createElement('div');
+      cell.className = 'cal-day';
+      if (iso === todayISO) cell.classList.add('today');
+      if (iso === selectedDay) cell.classList.add('selected');
+
+      const n = document.createElement('div');
+      n.className = 'cal-day-num';
+      n.textContent = day;
+      cell.appendChild(n);
+
+      const towns = eventMap[iso];
+      if (towns && towns.size > 0) {
+        const dotsEl = document.createElement('div');
+        dotsEl.className = 'cal-dots';
+        // Show up to 3 distinct town dots
+        [...towns].slice(0,3).forEach(town => {
+          const dot = document.createElement('div');
+          dot.className = 'cal-dot ' +
+            (town.includes('medford') ? 'dot-medford' :
+             town.includes('somerville') ? 'dot-somerville' :
+             town.includes('cambridge') ? 'dot-cambridge' : '');
+          dotsEl.appendChild(dot);
+        });
+        cell.appendChild(dotsEl);
+      }
+
+      cell.addEventListener('click', () => selectDay(iso, d));
+      grid.appendChild(cell);
+    }
+
+    // Trailing cells to fill last row
+    const total = firstDow + daysInMonth;
+    const trailing = total % 7 === 0 ? 0 : 7 - (total % 7);
+    for (let i = 1; i <= trailing; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cal-day faded';
+      const n = document.createElement('div');
+      n.className = 'cal-day-num';
+      n.textContent = i;
+      cell.appendChild(n);
+      cell.style.pointerEvents = 'none';
+      grid.appendChild(cell);
+    }
+  }
+
+  function selectDay(iso, dateObj) {
+    selectedDay = iso;
+    document.getElementById('cal-all-btn').classList.remove('active');
+    const lbl = dateObj.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+    const el = document.getElementById('cal-day-label');
+    el.textContent = `Showing events for ${lbl}`;
+    el.classList.add('visible');
+    renderCalendar();
+    renderEvents();
+  }
+
+  function clearDayFilter() {
+    selectedDay = null;
+    document.getElementById('cal-all-btn').classList.add('active');
+    document.getElementById('cal-day-label').classList.remove('visible');
+    renderCalendar();
+    renderEvents();
+  }
+
+  function shiftMonth(dir) {
+    calMonth += dir;
+    if (calMonth < 0)  { calMonth = 11; calYear--; }
+    if (calMonth > 11) { calMonth = 0;  calYear++; }
+    renderCalendar();
+  }
+
+  // ── Search
+  function onSearchInput(val) {
+    searchQuery = val.trim().toLowerCase();
+    const clearBtn = document.getElementById('search-clear');
+    clearBtn.classList.toggle('visible', searchQuery.length > 0);
+    renderEvents();
+  }
+
+  function clearSearch() {
+    searchQuery = '';
+    document.getElementById('search-input').value = '';
+    document.getElementById('search-clear').classList.remove('visible');
+    renderEvents();
+  }
+
+  // Highlight matching text in a string
+  function highlight(text, query) {
+    if (!query || !text) return text || '';
+    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return text.replace(new RegExp(`(${escaped})`, 'gi'),
+      '<mark>$1</mark>');
+  }
+
+  // ── Render events
+  function renderEvents() {
+    const grid  = document.getElementById('events-grid');
+    const empty = document.getElementById('empty-state');
+    const count = document.getElementById('status-count');
+
+    const filtered = allEvents.filter(e => {
+      const townOk = filters.town === 'all' || (e.town||'').toLowerCase().includes(filters.town);
+      const typeOk = filters.type === 'all' || (e.type||'').toLowerCase() === filters.type;
+      let dayOk = true;
+      if (selectedDay) {
+        const d = parseEventDate(e.date);
+        dayOk = d ? toISO(d) === selectedDay : false;
+      }
+      let searchOk = true;
+      if (searchQuery) {
+        const haystack = [e.title, e.description, e.location, e.town, e.type, e.date]
+          .join(' ').toLowerCase();
+        searchOk = haystack.includes(searchQuery);
+      }
+      return townOk && typeOk && dayOk && searchOk;
+    });
+
+    count.textContent = `${filtered.length} event${filtered.length !== 1 ? 's' : ''}`;
+
+    if (filtered.length === 0) {
+      grid.classList.add('hidden');
+      empty.classList.add('visible');
+    } else {
+      empty.classList.remove('visible');
+      grid.classList.remove('hidden');
+      const q = searchQuery;
+      grid.innerHTML = filtered.map(e => `
+        <article class="event-card ${townClass(e.town)} ${q ? 'search-match' : ''}">
+          <div class="card-meta">
+            <span class="card-date">${highlight(e.date, q)}</span>
+            <span class="card-town ${townClass(e.town)}">${e.town || ''}</span>
+          </div>
+          <div class="card-title">${highlight(e.title, q)}</div>
+          <span class="card-type">${e.type || 'event'}</span>
+          <div class="card-desc">${highlight(e.description, q)}</div>
+          <div class="card-footer">
+            <span class="card-location">${highlight(e.location, q)}</span>
+            ${e.url ? `<a class="card-link" href="${e.url}" target="_blank" rel="noopener">Details →</a>` : ''}
+          </div>
+        </article>`).join('');
+    }
+  }
+
+  // ── Fetch
+  async function fetchEvents() {
+    const btn     = document.getElementById('fetch-btn');
+    const loading = document.getElementById('loading-state');
+    const welcome = document.getElementById('welcome-panel');
+    const grid    = document.getElementById('events-grid');
+    const errEl   = document.getElementById('error-banner');
+    const status  = document.getElementById('status-text');
+    const calPanel= document.getElementById('calendar-panel');
+
+    btn.disabled = true; btn.textContent = 'Loading...';
+    welcome.classList.add('hidden');
+    calPanel.classList.remove('visible');
+    grid.classList.add('hidden');
+    loading.classList.add('visible');
+    errEl.classList.remove('visible');
+    status.textContent = 'Fetching live events...';
+
+    const msgs = [
+      'Checking Cambridge city calendar...','Scanning Somerville events...',
+      'Looking up Medford happenings...','Checking Eventbrite & Do617...','Almost there...'
+    ];
+    let mi = 0;
+    const tick = setInterval(() => {
+      document.getElementById('loading-subtext').textContent = msgs[mi++ % msgs.length];
+    }, 1800);
+
+    const today   = NOW.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+    const isoNow  = todayISO;
+    // Compute the date 3 weeks out for context
+    const threeWeeks = new Date(NOW); threeWeeks.setDate(threeWeeks.getDate() + 21);
+    const endDate = threeWeeks.toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
+
+    const prompt = `Today is ${today} (${isoNow}). You are a local events aggregator for Medford, Somerville, and Cambridge, MA.
+
+Generate a realistic list of upcoming events from today through ${endDate}. Include arts/culture, live music, food & drink, community/civic, outdoors, kids/family, and sports/fitness events.
+
+Key local venues:
+- Cambridge: Harvard Square, Central Square, Inman Square, Brattle Theatre, Cambridge Public Library, Multicultural Arts Center, ONCE Lounge, MIT
+- Somerville: Assembly Row, Davis Square, Bow Market, Arts at the Armory, Somerville Theatre, Somerville Museum, Union Square
+- Medford: Chevalier Theatre, Tufts University, Medford Public Library, Brooks Estate, West Medford Community Center
+
+CRITICAL date format rule: Every event's "date" field MUST use this exact format: "Weekday, Mon DD" or "Weekday, Mon DD · H:mmam/pm"
+Examples: "Sat, Mar 22", "Thu, Mar 20 · 7pm", "Sun, Apr 6 · 2pm"
+All dates must fall between ${today} and ${endDate}. Do NOT use dates outside this range.
+
+Return ONLY a raw JSON array with no markdown fences, no explanation, no preamble. 24-30 events. Each object:
+{
+  "title": "specific event name",
+  "date": "Weekday, Mon DD · time",
+  "town": "Cambridge" | "Somerville" | "Medford",
+  "type": "arts" | "music" | "food" | "community" | "outdoors" | "kids" | "sports",
+  "description": "2-3 specific, informative sentences",
+  "location": "specific venue name",
+  "url": null
+}
+
+Spread events across all days. Multiple events same day is fine. Balance all 3 towns.`;
+
+    try {
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 5000,
+          tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+
+      const data = await resp.json();
+      clearInterval(tick);
+      if (!resp.ok) throw new Error(data.error?.message || 'API error');
+
+      let raw = '';
+      for (const b of (data.content||[])) { if (b.type === 'text') raw += b.text; }
+
+      const match = raw.match(/\[[\s\S]*\]/);
+      if (!match) throw new Error('Could not parse events from response');
+      allEvents = JSON.parse(match[0]);
+
+      // Reset day selection on fresh load
+      selectedDay = null;
+      document.getElementById('cal-all-btn').classList.add('active');
+      document.getElementById('cal-day-label').classList.remove('visible');
+      // Sync calendar to current month
+      calYear = NOW.getFullYear(); calMonth = NOW.getMonth();
+
+      loading.classList.remove('visible');
+      calPanel.classList.add('visible');
+      document.getElementById('search-bar').classList.remove('hidden');
+      renderCalendar();
+      status.textContent = `Updated · ${today}`;
+      renderEvents();
+
+    } catch (err) {
+      clearInterval(tick);
+      loading.classList.remove('visible');
+      welcome.classList.remove('hidden');
+      errEl.textContent = `Could not load events: ${err.message}. Please try again.`;
+      errEl.classList.add('visible');
+      status.textContent = 'Error loading events';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '↻ Refresh Events';
+    }
+  }
+</script>
+</body>
+</html>
