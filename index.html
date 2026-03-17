@@ -290,9 +290,15 @@
 
   .dpp-day.range-start.range-end { border-radius: 2px; }
 
-  /* Range mode: tap-first indicator */
+  /* Range mode: tap-first indicator — pulses to show "waiting for end date" */
   .dpp-day.range-anchor {
-    background: var(--ink) !important; color: var(--cream) !important; border-color: var(--ink) !important;
+    background: var(--rust) !important; color: var(--cream) !important; border-color: var(--rust) !important;
+    animation: anchorPulse 1.2s ease-in-out infinite;
+  }
+
+  @keyframes anchorPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
   }
 
   /* Selection summary */
@@ -316,10 +322,10 @@
   }
 
   .dpp-range-hint {
-    font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.06em;
-    color: var(--mid-rule); margin-top: 8px;
-    padding: 6px 10px; border: 1px dashed var(--light-rule);
-    background: rgba(212,160,23,0.05); display: none;
+    font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.06em;
+    color: var(--rust); margin-top: 8px;
+    padding: 8px 12px; border: 1px solid rgba(196,68,10,0.25);
+    background: rgba(196,68,10,0.04); display: none;
   }
 
   .dpp-range-hint.visible { display: block; }
@@ -1218,7 +1224,11 @@ Balance all 3 towns. Multiple events per day is great.`;
   try {
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514', max_tokens: 5000,
         tools: [{ type: 'web_search_20250305', name: 'web_search' }],
